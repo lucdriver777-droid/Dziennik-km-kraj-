@@ -6,8 +6,8 @@
   <title>Dziennik Kierowcy — Kilometry po kraju</title>
   <link rel="stylesheet" href="styles.css" />
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/pdfmake.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/vfs_fonts.min.js"></script>
 </head>
 <body>
   <div class="app">
@@ -23,17 +23,17 @@
         <div class="grid grid-2">
           <div class="field">
             <label for="driverName">Kierowca</label>
-            <input type="text" id="driverName" placeholder="Np. Jan Kowalski" />
+            <input type="text" id="driverName" placeholder="Np. Łukasz Stasiński" />
           </div>
 
           <div class="field">
             <label for="vehicleNumber">Nr auta</label>
-            <input type="text" id="vehicleNumber" placeholder="Np. PO 12345" />
+            <input type="text" id="vehicleNumber" placeholder="Np. PWL 79191" />
           </div>
 
           <div class="field">
             <label for="companyName">Firma</label>
-            <input type="text" id="companyName" placeholder="Np. Transport XYZ" />
+            <input type="text" id="companyName" placeholder="Np. HIT" />
           </div>
 
           <div class="field">
@@ -62,12 +62,12 @@
 
             <div class="field">
               <label for="startPlace">Miejsce początkowe</label>
-              <input type="text" id="startPlace" placeholder="Np. Baza / Granica / Miasto" required />
+              <input type="text" id="startPlace" placeholder="Np. Wolsztyn" required />
             </div>
 
             <div class="field">
               <label for="endPlace">Miejsce końcowe</label>
-              <input type="text" id="endPlace" placeholder="Np. Granica / Baza / Miasto" required />
+              <input type="text" id="endPlace" placeholder="Np. Świecko" required />
             </div>
 
             <div class="field">
