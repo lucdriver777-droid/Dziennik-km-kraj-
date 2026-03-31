@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dziennik Kierowcy — Start / Granica</title>
+  <title>Dziennik Kierowcy — Kilometry po kraju</title>
   <link rel="stylesheet" href="styles.css" />
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -13,7 +13,7 @@
   <div class="app">
     <header class="topbar">
       <h1>Dziennik Kierowcy</h1>
-      <p>Raport kilometrów po kraju — <strong>START → GRANICA</strong></p>
+      <p>Raport kilometrów po kraju</p>
     </header>
 
     <main class="container">
@@ -35,6 +35,116 @@
             <label for="companyName">Firma</label>
             <input type="text" id="companyName" placeholder="Np. Transport XYZ" />
           </div>
+
+          <div class="field">
+            <label for="reportPeriod">Okres / miesiąc</label>
+            <input type="text" id="reportPeriod" placeholder="Np. Marzec 2026" />
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="saveReportBtn" class="btn btn-primary" type="button">Zapisz dane raportu</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-head">
+          <h2>Dodaj wpis</h2>
+          <span id="editBadge" class="badge hidden">Tryb edycji</span>
+        </div>
+
+        <form id="entryForm">
+          <div class="grid grid-3">
+            <div class="field">
+              <label for="entryDate">Data</label>
+              <input type="date" id="entryDate" required />
+            </div>
+
+            <div class="field">
+              <label for="startPlace">Miejsce początkowe</label>
+              <input type="text" id="startPlace" placeholder="Np. Baza / Granica / Miasto" required />
+            </div>
+
+            <div class="field">
+              <label for="endPlace">Miejsce końcowe</label>
+              <input type="text" id="endPlace" placeholder="Np. Granica / Baza / Miasto" required />
+            </div>
+
+            <div class="field">
+              <label for="startOdometer">Licznik początkowy</label>
+              <input type="number" id="startOdometer" min="0" step="1" placeholder="Np. 123456" required />
+            </div>
+
+            <div class="field">
+              <label for="endOdometer">Licznik końcowy</label>
+              <input type="number" id="endOdometer" min="0" step="1" placeholder="Np. 123789" required />
+            </div>
+
+            <div class="field">
+              <label for="countryKm">Kilometry po kraju</label>
+              <input type="number" id="countryKm" readonly />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="notes">Uwagi</label>
+            <textarea id="notes" rows="3" placeholder="Dodatkowe informacje..."></textarea>
+          </div>
+
+          <div class="actions">
+            <button type="submit" id="submitBtn" class="btn btn-primary">Dodaj wpis</button>
+            <button type="button" id="cancelEditBtn" class="btn btn-secondary hidden">Anuluj edycję</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="card">
+        <div class="section-head">
+          <h2>Lista wpisów</h2>
+          <div class="summary">
+            <span>Liczba wpisów: <strong id="entriesCount">0</strong></span>
+            <span>Suma km po kraju: <strong id="totalKm">0</strong></span>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Miejsce początkowe</th>
+                <th>Miejsce końcowe</th>
+                <th>Licznik początkowy</th>
+                <th>Licznik końcowy</th>
+                <th>Km po kraju</th>
+                <th>Uwagi</th>
+                <th>Akcje</th>
+              </tr>
+            </thead>
+            <tbody id="entriesTableBody">
+              <tr>
+                <td colspan="8" class="empty">Brak wpisów.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="actions">
+          <button id="exportCsvBtn" class="btn btn-secondary" type="button">Eksport CSV</button>
+          <button id="exportPdfBtn" class="btn btn-secondary" type="button">Eksport PDF</button>
+          <button id="clearAllBtn" class="btn btn-danger" type="button">Wyczyść wszystko</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <span>Ł.S. &amp; CzatGpt</span>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>          </div>
 
           <div class="field">
             <label for="reportPeriod">Okres / miesiąc</label>
