@@ -1,4 +1,4 @@
-const STORAGE_KEY = "dziennik_kierowcy_km_kraj_v6";
+const STORAGE_KEY = "dziennik_kierowcy_km_kraj_v7";
 
 const state = {
   report: {
@@ -40,10 +40,13 @@ const els = {
 };
 
 function saveToStorage() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({
-    report: state.report,
-    entries: state.entries,
-  }));
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify({
+      report: state.report,
+      entries: state.entries,
+    })
+  );
 }
 
 function loadFromStorage() {
@@ -53,11 +56,13 @@ function loadFromStorage() {
   try {
     const parsed = JSON.parse(raw);
 
-    if (parsed.report) {
-      state.report.driverName = parsed.report.driverName || "";
-      state.report.vehicleNumber = parsed.report.vehicleNumber || "";
-      state.report.companyName = parsed.report.companyName || "";
-      state.report.reportPeriod = parsed.report.reportPeriod || "";
+    if (parsed.report && typeof parsed.report === "object") {
+      state.report = {
+        driverName: parsed.report.driverName || "",
+        vehicleNumber: parsed.report.vehicleNumber || "",
+        companyName: parsed.report.companyName || "",
+        reportPeriod: parsed.report.reportPeriod || "",
+      };
     }
 
     if (Array.isArray(parsed.entries)) {
@@ -293,52 +298,107 @@ function exportPdf() {
     return;
   }
 
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF("l", "mm", "a4");
+  const sortedEntries = getSortedEntriesWithIndex().map(({ entry }) => entry);
 
-  doc.setFontSize(16);
-  doc.text("Dziennik Kierowcy — Kilometry po kraju", 14, 14);
+  const tableBody = [
+    [
+      { text: "Data", style: "tableHeader" },
+      { text: "Miejsce początkowe", style: "tableHeader" },
+      { text: "Miejsce końcowe", style: "tableHeader" },
+      { text: "Licznik początkowy", style: "tableHeader" },
+      { text: "Licznik końcowy", style: "tableHeader" },
+      { text: "Km po kraju", style: "tableHeader" },
+      { text: "Uwagi", style: "tableHeader" }
+    ]
+  ];
 
-  doc.setFontSize(10);
-  doc.text(`Kierowca: ${state.report.driverName || "-"}`, 14, 22);
-  doc.text(`Nr auta: ${state.report.vehicleNumber || "-"}`, 14, 28);
-  doc.text(`Firma: ${state.report.companyName || "-"}`, 90, 22);
-  doc.text(`Okres: ${state.report.reportPeriod || "-"}`, 90, 28);
-
-  const body = getSortedEntriesWithIndex().map(({ entry }) => [
-    entry.date,
-    entry.startPlace,
-    entry.endPlace,
-    String(entry.startOdometer),
-    String(entry.endOdometer),
-    String(entry.countryKm),
-    entry.notes || "-"
-  ]);
-
-  doc.autoTable({
-    startY: 34,
-    head: [[
-      "Data",
-      "Miejsce początkowe",
-      "Miejsce końcowe",
-      "Licznik początkowy",
-      "Licznik końcowy",
-      "Km po kraju",
-      "Uwagi"
-    ]],
-    body,
-    styles: { fontSize: 8, cellPadding: 2, overflow: "linebreak" },
-    headStyles: { fillColor: [37, 99, 235] }
+  sortedEntries.forEach((entry) => {
+    tableBody.push([
+      entry.date || "-",
+      entry.startPlace || "-",
+      entry.endPlace || "-",
+      formatNumber(entry.startOdometer),
+      formatNumber(entry.endOdometer),
+      formatNumber(entry.countryKm),
+      entry.notes || "-"
+    ]);
   });
 
-  const totalKm = state.entries.reduce((sum, item) => sum + (Number(item.countryKm) || 0), 0);
-  const finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY : 40;
+  const totalKm = state.entries.reduce(
+    (sum, item) => sum + (Number(item.countryKm) || 0),
+    0
+  );
 
-  doc.setFontSize(11);
-  doc.text(`Liczba wpisów: ${state.entries.length}`, 14, finalY + 8);
-  doc.text(`Suma km po kraju: ${formatNumber(totalKm)}`, 70, finalY + 8);
+  const docDefinition = {
+    pageSize: "A4",
+    pageOrientation: "landscape",
+    pageMargins: [24, 24, 24, 30],
+    content: [
+      {
+        text: "Dziennik Kierowcy — Kilometry po kraju",
+        style: "title",
+        margin: [0, 0, 0, 12]
+      },
+      {
+        columns: [
+          [
+            { text: `Kierowca: ${state.report.driverName || "-"}`, margin: [0, 0, 0, 4] },
+            { text: `Nr auta: ${state.report.vehicleNumber || "-"}` }
+          ],
+          [
+            { text: `Firma: ${state.report.companyName || "-"}`, margin: [0, 0, 0, 4] },
+            { text: `Okres: ${state.report.reportPeriod || "-"}` }
+          ]
+        ],
+        columnGap: 30,
+        margin: [0, 0, 0, 14]
+      },
+      {
+        table: {
+          headerRows: 1,
+          widths: [58, 120, 120, 78, 78, 62, "*"],
+          body: tableBody
+        },
+        layout: {
+          fillColor: function (rowIndex) {
+            return rowIndex === 0 ? "#2563eb" : null;
+          },
+          hLineColor: function () {
+            return "#d1d5db";
+          },
+          vLineColor: function () {
+            return "#d1d5db";
+          },
+          paddingLeft: function () { return 6; },
+          paddingRight: function () { return 6; },
+          paddingTop: function () { return 4; },
+          paddingBottom: function () { return 4; }
+        }
+      },
+      {
+        columns: [
+          { text: `Liczba wpisów: ${state.entries.length}`, margin: [0, 14, 0, 0] },
+          { text: `Suma km po kraju: ${formatNumber(totalKm)}`, margin: [0, 14, 0, 0] }
+        ]
+      }
+    ],
+    styles: {
+      title: {
+        fontSize: 16,
+        bold: true
+      },
+      tableHeader: {
+        color: "#ffffff",
+        bold: true,
+        fontSize: 10
+      }
+    },
+    defaultStyle: {
+      fontSize: 9
+    }
+  };
 
-  doc.save("dziennik-kierowcy-km-po-kraju.pdf");
+  pdfMake.createPdf(docDefinition).download("dziennik-kierowcy-km-po-kraju.pdf");
 }
 
 function clearAllData() {
